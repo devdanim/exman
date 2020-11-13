@@ -2,7 +2,6 @@ var path = require('path');
 var spawn = require('child_process').spawn;
 
 var PLATFORM = require('os').platform();
-var IS_WINDOWS = /^win[0-9]{2}$/.test(PLATFORM);
 
 var EXECUTABLES = {
     darwin: path.join(__dirname, '..', 'bin/ExManCmd_mac/Contents/MacOS/ExManCmd'),
@@ -44,11 +43,7 @@ var exManCommand = function(command) {
                 return reject('The "' + command + '" command requires the first argument to be ' + ARGUMENT_HELP[command]);
             }
 
-            var executable = EXECUTABLES[PLATFORM];
-            if (IS_WINDOWS) {
-                // Windows can't navigate the electon asar binary, use the unpacked files
-                executable = executable.replace('app.asar', 'app.asar.unpacked');
-            }
+            var executable = EXECUTABLES[PLATFORM].replace('app.asar', 'app.asar.unpacked');
 
             var args = [COMMAND_PREFIXES[PLATFORM] + command, argument];
 
