@@ -19,3 +19,5 @@ node_modules
 
 # Only keep the zip file for each platform in git history
 bin/ExManCMD_*/
+
+.vscode
