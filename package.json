@@ -23,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/bhstahl/exman/issues"
   },
-  "homepage": "https://github.com/bhstahl/exman#readme"
+  "homepage": "https://github.com/bhstahl/exman#readme",
+  "dependencies": {
+    "sudo-prompt": "^9.2.1"
+  }
 }

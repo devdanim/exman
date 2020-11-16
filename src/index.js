@@ -1,6 +1,6 @@
+const { exec } = require('child_process');
 var path = require('path');
-var spawn = require('child_process').spawn;
-
+var sudo = require('sudo-prompt');
 var PLATFORM = require('os').platform();
 
 var EXECUTABLES = {
@@ -32,7 +32,7 @@ var ARGUMENT_HELP = {
  * @return {Function}           Function to execute that command
  */
 var exManCommand = function(command) {
-    return function(argument) {
+    return function(argument, sudoOptions = { name: "Exman "}) {
         return new Promise(function(resolve, reject) {
 
             if (!(PLATFORM in EXECUTABLES)) {
@@ -45,23 +45,18 @@ var exManCommand = function(command) {
 
             var executable = EXECUTABLES[PLATFORM].replace('app.asar', 'app.asar.unpacked');
 
-            var args = [COMMAND_PREFIXES[PLATFORM] + command, argument];
+            var args = [COMMAND_PREFIXES[PLATFORM] + command, `"${argument}"`];
 
-            var commandProcess = spawn(executable, args);
-
-            commandProcess.stdout.on('data', reject);
-            commandProcess.stderr.on('data', reject);
-
-            commandProcess.on('exit', function(code) {
-                // code 0 => success
-                if (code !== 0) {
-                    return reject('Error: ExManCmd process exited with code: ' + code);
+            const needSudo = command === "install" || command === "remove";
+            const _exec = needSudo ? sudo.exec : exec;
+            _exec(
+                `"${executable}" ${args.join(" ")}`, 
+                needSudo ? sudoOptions : {},
+                (err, stdout, stderr) => {
+                    if (err) reject(err);
+                    else resolve(stdout);
                 }
-
-                resolve(code);
-            });
-
-            commandProcess.on('error', reject);
+            );
         });
     };
 };
