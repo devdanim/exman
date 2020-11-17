@@ -32,7 +32,7 @@ var ARGUMENT_HELP = {
  * @return {Function}           Function to execute that command
  */
 var exManCommand = function(command) {
-    return function(argument, sudoOptions = { name: "Exman "}) {
+    return function(argument, sudoOptions = { name: "Exman" }) {
         return new Promise(function(resolve, reject) {
 
             if (!(PLATFORM in EXECUTABLES)) {
@@ -47,16 +47,19 @@ var exManCommand = function(command) {
 
             var args = [COMMAND_PREFIXES[PLATFORM] + command, `"${argument}"`];
 
-            const needSudo = command === "install" || command === "remove";
-            const _exec = needSudo ? sudo.exec : exec;
-            _exec(
-                `"${executable}" ${args.join(" ")}`, 
-                needSudo ? sudoOptions : {},
-                (err, stdout, stderr) => {
-                    if (err) reject(err);
-                    else resolve(stdout);
+            var cmd = `"${executable}" ${args.join(" ")}`;
+            exec(cmd, {}, (err, stdout, stderr) => {
+                    if (err) {
+                        if (command === "install" || command === "remove") {
+                            sudo.exec(cmd, sudoOptions, (err, stdout, stderr) => {
+                                    if (err) reject(err);
+                                    else resolve(stdout);
+                                }
+                            );
+                        } else reject(err);
+                    } else resolve(stdout);
                 }
-            );
+            )
         });
     };
 };
