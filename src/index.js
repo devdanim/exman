@@ -48,18 +48,26 @@ var exManCommand = function(command) {
             var args = [COMMAND_PREFIXES[PLATFORM] + command, `"${argument}"`];
 
             var cmd = `"${executable}" ${args.join(" ")}`;
-            exec(cmd, {}, (err, stdout, stderr) => {
-                    if (err) {
-                        if (command === "install" || command === "remove") {
-                            sudo.exec(cmd, sudoOptions, (err, stdout, stderr) => {
-                                    if (err) reject(err);
-                                    else resolve(stdout);
-                                }
-                            );
-                        } else reject(err);
-                    } else resolve(stdout);
-                }
-            )
+            var needSudo = command === "install" || command === "remove";
+
+            var _sudo = () => {
+                sudo.exec(cmd, sudoOptions, (err, stdout, stderr) => {
+                        if (err) reject(err);
+                        else resolve(stdout);
+                    }
+                );
+            }
+
+            if (process.platform === "darwin" && needSudo) _sudo();
+            else {
+                exec(cmd, {}, (err, stdout, stderr) => {
+                        if (err) {
+                            if (needSudo) _sudo();
+                            else reject(err);
+                        } else resolve(stdout);
+                    }
+                )
+            }
         });
     };
 };
