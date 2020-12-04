@@ -52,7 +52,7 @@ var exManCommand = function(command) {
 
             var _sudo = () => {
                 sudo.exec(cmd, sudoOptions, (err, stdout, stderr) => {
-                        if (err) reject(err);
+                        if (err) reject(stderr);
                         else resolve(stdout);
                     }
                 );
@@ -63,7 +63,7 @@ var exManCommand = function(command) {
                 exec(cmd, {}, (err, stdout, stderr) => {
                         if (err) {
                             if (needSudo) _sudo();
-                            else reject(err);
+                            else reject(stderr);
                         } else resolve(stdout);
                     }
                 )
