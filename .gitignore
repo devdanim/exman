@@ -21,3 +21,5 @@ node_modules
 bin/ExManCMD_*/
 
 .vscode
+
+test.js
